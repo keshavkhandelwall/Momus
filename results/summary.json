@@ -1,0 +1,229 @@
+{
+ "n_runs": 4380,
+ "share_ga_beats_random": 1.0,
+ "share_any_evolutionary_best": 1.0,
+ "best_method_counts": {
+  "random": 0,
+  "hillclimb": 21,
+  "ga": 9,
+  "mapelites": 2
+ },
+ "belady": [
+  {
+   "length": 24,
+   "pages": 6,
+   "method": "random",
+   "runs": 30,
+   "success_rate": 1.0,
+   "median_evals_to_first_anomaly": 1060,
+   "median_extra_faults": 1.0,
+   "max_extra_faults": 2.0,
+   "max_anomaly_ratio": 1.2
+  },
+  {
+   "length": 24,
+   "pages": 6,
+   "method": "hillclimb",
+   "runs": 30,
+   "success_rate": 1.0,
+   "median_evals_to_first_anomaly": 680,
+   "median_extra_faults": 2.0,
+   "max_extra_faults": 6.0,
+   "max_anomaly_ratio": 1.429
+  },
+  {
+   "length": 24,
+   "pages": 6,
+   "method": "ga",
+   "runs": 30,
+   "success_rate": 0.633,
+   "median_evals_to_first_anomaly": 826,
+   "median_extra_faults": 1.0,
+   "max_extra_faults": 6.0,
+   "max_anomaly_ratio": 1.429
+  },
+  {
+   "length": 24,
+   "pages": 6,
+   "method": "mapelites",
+   "runs": 30,
+   "success_rate": 0.967,
+   "median_evals_to_first_anomaly": 652,
+   "median_extra_faults": 1.0,
+   "max_extra_faults": 4.0,
+   "max_anomaly_ratio": 1.308
+  },
+  {
+   "length": 64,
+   "pages": 8,
+   "method": "random",
+   "runs": 30,
+   "success_rate": 0.433,
+   "median_evals_to_first_anomaly": 5562,
+   "median_extra_faults": 0.0,
+   "max_extra_faults": 2.0,
+   "max_anomaly_ratio": 1.054
+  },
+  {
+   "length": 64,
+   "pages": 8,
+   "method": "hillclimb",
+   "runs": 30,
+   "success_rate": 1.0,
+   "median_evals_to_first_anomaly": 940,
+   "median_extra_faults": 6.0,
+   "max_extra_faults": 12.0,
+   "max_anomaly_ratio": 1.48
+  },
+  {
+   "length": 64,
+   "pages": 8,
+   "method": "ga",
+   "runs": 30,
+   "success_rate": 0.967,
+   "median_evals_to_first_anomaly": 1860,
+   "median_extra_faults": 3.0,
+   "max_extra_faults": 12.0,
+   "max_anomaly_ratio": 1.414
+  },
+  {
+   "length": 64,
+   "pages": 8,
+   "method": "mapelites",
+   "runs": 30,
+   "success_rate": 0.967,
+   "median_evals_to_first_anomaly": 1435,
+   "median_extra_faults": 2.0,
+   "max_extra_faults": 10.0,
+   "max_anomaly_ratio": 1.526
+  }
+ ],
+ "bound": [
+  {
+   "target": "Clock",
+   "k": 2,
+   "evolved_max": 1.9286,
+   "evolved_median": 1.9167,
+   "cyclic_adversary": 1.9394,
+   "theoretical_bound_k": 2
+  },
+  {
+   "target": "Clock",
+   "k": 3,
+   "evolved_max": 2.6667,
+   "evolved_median": 2.4556,
+   "cyclic_adversary": 2.6667,
+   "theoretical_bound_k": 3
+  },
+  {
+   "target": "Clock",
+   "k": 4,
+   "evolved_max": 3.25,
+   "evolved_median": 2.7857,
+   "cyclic_adversary": 3.3684,
+   "theoretical_bound_k": 4
+  },
+  {
+   "target": "Clock",
+   "k": 5,
+   "evolved_max": 3.3846,
+   "evolved_median": 2.9258,
+   "cyclic_adversary": 3.7647,
+   "theoretical_bound_k": 5
+  },
+  {
+   "target": "Clock",
+   "k": 6,
+   "evolved_max": 3.4615,
+   "evolved_median": 3.0774,
+   "cyclic_adversary": 4.0,
+   "theoretical_bound_k": 6
+  },
+  {
+   "target": "FIFO",
+   "k": 2,
+   "evolved_max": 1.9286,
+   "evolved_median": 1.9183,
+   "cyclic_adversary": 1.9394,
+   "theoretical_bound_k": 2
+  },
+  {
+   "target": "FIFO",
+   "k": 3,
+   "evolved_max": 2.6667,
+   "evolved_median": 2.5504,
+   "cyclic_adversary": 2.6667,
+   "theoretical_bound_k": 3
+  },
+  {
+   "target": "FIFO",
+   "k": 4,
+   "evolved_max": 3.1429,
+   "evolved_median": 2.8571,
+   "cyclic_adversary": 3.3684,
+   "theoretical_bound_k": 4
+  },
+  {
+   "target": "FIFO",
+   "k": 5,
+   "evolved_max": 3.5,
+   "evolved_median": 3.0,
+   "cyclic_adversary": 3.7647,
+   "theoretical_bound_k": 5
+  },
+  {
+   "target": "FIFO",
+   "k": 6,
+   "evolved_max": 3.5,
+   "evolved_median": 3.0,
+   "cyclic_adversary": 4.0,
+   "theoretical_bound_k": 6
+  },
+  {
+   "target": "LRU",
+   "k": 2,
+   "evolved_max": 1.9355,
+   "evolved_median": 1.9231,
+   "cyclic_adversary": 1.9394,
+   "theoretical_bound_k": 2
+  },
+  {
+   "target": "LRU",
+   "k": 3,
+   "evolved_max": 2.6667,
+   "evolved_median": 2.5882,
+   "cyclic_adversary": 2.6667,
+   "theoretical_bound_k": 3
+  },
+  {
+   "target": "LRU",
+   "k": 4,
+   "evolved_max": 3.2,
+   "evolved_median": 3.0714,
+   "cyclic_adversary": 3.3684,
+   "theoretical_bound_k": 4
+  },
+  {
+   "target": "LRU",
+   "k": 5,
+   "evolved_max": 3.6667,
+   "evolved_median": 3.4451,
+   "cyclic_adversary": 3.7647,
+   "theoretical_bound_k": 5
+  },
+  {
+   "target": "LRU",
+   "k": 6,
+   "evolved_max": 3.8571,
+   "evolved_median": 3.5,
+   "cyclic_adversary": 4.0,
+   "theoretical_bound_k": 6
+  }
+ ],
+ "sig_better_than_random": {
+  "hillclimb": 32,
+  "ga": 32,
+  "mapelites": 32
+ },
+ "n_problems": 32
+}

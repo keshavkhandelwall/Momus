@@ -1,0 +1,11 @@
+body{font-family:Georgia,"Times New Roman",serif;max-width:780px;margin:0 auto;padding:24px;line-height:1.5;color:#111;background:#fff;font-size:11pt}
+h1.title{font-size:20pt;line-height:1.25;text-align:center}
+p.author,p.date{text-align:center;margin:2px}
+.abstract{margin:18px 36px;font-size:10pt}
+h1{font-size:14pt;margin-top:22px}h2{font-size:12pt}
+table{border-collapse:collapse;width:100%;font-size:9pt;margin:10px 0}
+th,td{border-bottom:1px solid #ccc;padding:4px 6px;text-align:left;vertical-align:top}
+caption{caption-side:top;font-size:9pt;font-style:italic;text-align:left;margin-bottom:4px}
+figure{margin:14px 0;page-break-inside:avoid}figure img{width:100%}
+figcaption{font-size:9pt;font-style:italic}
+code{font-size:9pt}

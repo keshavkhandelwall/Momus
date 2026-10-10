@@ -1,0 +1,65 @@
+problem,descriptor,spearman_rho,p,cells
+paging-FIFO-k4,distinct pages used,-0.094,0.5847570880362952,36
+paging-FIFO-k4,locality (LRU hit share),-0.82,9.39961806703691e-10,36
+paging-LRU-k4,distinct pages used,0.08,0.6283587216527858,39
+paging-LRU-k4,locality (LRU hit share),-0.92,1.2468412062477203e-16,39
+paging-Clock-k4,distinct pages used,-0.046,0.7915508307478442,36
+paging-Clock-k4,locality (LRU hit share),-0.823,7.381234959141298e-10,36
+paging-LFU-k4,distinct pages used,0.004,0.9829612867171776,33
+paging-LFU-k4,locality (LRU hit share),0.643,5.3993892740664775e-05,33
+cpu-mean-FCFS,burst variability (CV),0.995,4.961227033289532e-100,100
+cpu-mean-FCFS,arrival spread,0.076,0.4538641950187509,100
+cpu-mean-SJF,burst variability (CV),0.975,4.792377778030833e-66,100
+cpu-mean-SJF,arrival spread,0.175,0.0811657460593109,100
+cpu-mean-Priority,burst variability (CV),0.986,1.6765472548033195e-77,100
+cpu-mean-Priority,arrival spread,0.138,0.16987044710466329,100
+cpu-mean-RR-q2,burst variability (CV),0.573,4.519423223510981e-10,100
+cpu-mean-RR-q2,arrival spread,0.635,1.2890893107973286e-12,100
+cpu-mean-RR-q8,burst variability (CV),0.98,7.211828917075043e-71,100
+cpu-mean-RR-q8,arrival spread,0.107,0.2883210468707069,100
+cpu-mean-MLFQ,burst variability (CV),-0.163,0.10423304540857092,100
+cpu-mean-MLFQ,arrival spread,0.898,8.393017811524468e-37,100
+cpu-max-SJF,burst variability (CV),-0.207,0.03852028799761057,100
+cpu-max-SJF,arrival spread,0.785,4.419616252866204e-22,100
+cpu-max-Priority,burst variability (CV),0.004,0.968173467964018,100
+cpu-max-Priority,arrival spread,0.705,2.768502733366411e-16,100
+cpu-max-SRTF,burst variability (CV),0.059,0.5619701565810642,100
+cpu-max-SRTF,arrival spread,0.791,1.1216797229559983e-22,100
+cpu-max-RR-q2,burst variability (CV),0.483,3.4937881916119267e-07,100
+cpu-max-RR-q2,arrival spread,0.587,1.4030633981301498e-10,100
+cpu-max-RR-q8,burst variability (CV),0.467,9.6818840107984e-07,100
+cpu-max-RR-q8,arrival spread,0.787,2.7961607980666423e-22,100
+cpu-max-MLFQ,burst variability (CV),-0.077,0.44810215168261225,100
+cpu-max-MLFQ,arrival spread,0.645,4.4028173453977107e-13,100
+disk-seek-FCFS,cylinder spread,0.183,0.14383445916181198,65
+disk-seek-FCFS,requests near head,-0.279,0.024466173748628813,65
+disk-seek-SSTF,cylinder spread,-0.53,4.7728247317617955e-06,66
+disk-seek-SSTF,requests near head,0.244,0.04853131557391727,66
+disk-seek-SCAN,cylinder spread,-0.975,3.834811335096014e-44,67
+disk-seek-SCAN,requests near head,0.264,0.030899226747625578,67
+disk-seek-C-SCAN,cylinder spread,-0.971,1.0775814139210144e-44,71
+disk-seek-C-SCAN,requests near head,0.302,0.010431489111108489,71
+disk-seek-LOOK,cylinder spread,-0.629,4.117391428442079e-09,71
+disk-seek-LOOK,requests near head,0.286,0.01577572981933203,71
+disk-seek-C-LOOK,cylinder spread,-0.628,4.5446172008086525e-09,71
+disk-seek-C-LOOK,requests near head,0.293,0.012995336058522603,71
+disk-wait-SSTF,cylinder spread,-0.121,0.23909766993089845,97
+disk-wait-SSTF,arrival spread,0.597,1.0958758654235108e-10,97
+disk-wait-SCAN,cylinder spread,-0.834,1.055786046073978e-25,95
+disk-wait-SCAN,arrival spread,0.373,0.00019898533409453057,95
+disk-wait-C-SCAN,cylinder spread,-0.859,8.63661878173574e-29,95
+disk-wait-C-SCAN,arrival spread,0.331,0.0010444374027905549,95
+disk-wait-LOOK,cylinder spread,-0.201,0.048679664654826704,97
+disk-wait-LOOK,arrival spread,0.637,2.4353449690536866e-12,97
+disk-wait-C-LOOK,cylinder spread,0.021,0.8361639072577671,97
+disk-wait-C-LOOK,arrival spread,0.689,6.253306376767808e-15,97
+memory-first,share of mallocs,-0.384,0.006446492615771121,49
+memory-first,mean request size,0.193,0.18483467927458316,49
+memory-next,share of mallocs,-0.281,0.07497018261495704,41
+memory-next,mean request size,-0.225,0.15790074229533144,41
+memory-best,share of mallocs,-0.083,0.5701084168718779,49
+memory-best,mean request size,-0.157,0.28246195397351037,49
+memory-worst,share of mallocs,-0.1,0.48348824256239925,51
+memory-worst,mean request size,0.01,0.9425848749754313,51
+memory-buddy,share of mallocs,-0.089,0.5231848548961864,54
+memory-buddy,mean request size,-0.19,0.16831364214439842,54

@@ -1,0 +1,33 @@
+setting,rank_most_robust,target,reference,worst_ratio,best_method
+paging,1,FIFO,OPT,3.2941,mapelites
+paging,2,Clock,OPT,3.2941,hillclimb
+paging,3,LRU,OPT,3.3684,hillclimb
+paging,4,LFU,OPT,12.0,hillclimb
+cpu-mean,1,RR-q2,SRTF,3.686,ga
+cpu-mean,2,RR-q8,SRTF,4.4364,hillclimb
+cpu-mean,3,MLFQ,SRTF,4.4961,ga
+cpu-mean,4,SJF,SRTF,9.1429,hillclimb
+cpu-mean,5,FCFS,SRTF,9.3571,hillclimb
+cpu-mean,6,Priority,SRTF,9.8667,hillclimb
+cpu-max,1,RR-q8,FCFS,3.4146,hillclimb
+cpu-max,2,RR-q2,FCFS,3.6857,hillclimb
+cpu-max,3,SJF,FCFS,4.8,hillclimb
+cpu-max,4,SRTF,FCFS,5.0,hillclimb
+cpu-max,5,MLFQ,FCFS,6.625,ga
+cpu-max,6,Priority,FCFS,7.25,hillclimb
+disk-seek,1,LOOK,offline optimum,1.9608,hillclimb
+disk-seek,2,SSTF,offline optimum,1.9612,ga
+disk-seek,3,C-LOOK,offline optimum,1.9802,hillclimb
+disk-seek,4,FCFS,offline optimum,22.1935,mapelites
+disk-seek,5,SCAN,offline optimum,100.0,hillclimb
+disk-seek,6,C-SCAN,offline optimum,199.0,hillclimb
+disk-wait,1,SSTF,FCFS,8.1333,hillclimb
+disk-wait,2,LOOK,FCFS,9.4688,hillclimb
+disk-wait,3,C-LOOK,FCFS,12.2,hillclimb
+disk-wait,4,SCAN,FCFS,74.75,hillclimb
+disk-wait,5,C-SCAN,FCFS,199.0,hillclimb
+memory,1,next,ideal (peak live bytes),2.322,ga
+memory,2,best,ideal (peak live bytes),2.3892,ga
+memory,3,first,ideal (peak live bytes),2.418,ga
+memory,4,worst,ideal (peak live bytes),2.4516,ga
+memory,5,buddy,ideal (peak live bytes),5.2245,ga
