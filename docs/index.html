@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Momus evolves the workloads that make classical OS scheduling, paging, memory and disk algorithms behave as badly as they possibly can.">
+<title>Momus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an editorial "document" column with flat bordered instruments; warm monochrome, colour only where a policy fails. */
+:root {
+  --bg: #fbfbfa;
+  --panel: #ffffff;
+  --ink: #2f3437;
+  --strong: #111111;
+  --muted: #787774;
+  --line: #eaeaea;
+  --accent: #1f6c9f;
+  --accent-soft: #e1f3fe;
+  --hit: #f1f1ef;
+  --fault: #9f2f2d;
+  --fault-soft: #fdebec;
+  --ok: #346538;
+  --ok-soft: #edf3ec;
+  --warn-soft: #fbf3db;
+  --warn: #956400;
+  --btn-bg: #111111;
+  --btn-fg: #ffffff;
+  --display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --body: "Geist", "Helvetica Neue", system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #191919; --panel: #202020; --ink: #d9d8d4; --strong: #f1f0ec; --muted: #9b9a97; --line: #2f2f2f;
+    --accent: #6cb4e4; --accent-soft: #1c2d38; --hit: #2a2a29; --fault: #f08a85; --fault-soft: #3a2424;
+    --ok: #86c38c; --ok-soft: #1f2e21; --warn-soft: #362f1c; --warn: #e0b45c; --btn-bg: #f1f0ec; --btn-fg: #191919;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #191919; --panel: #202020; --ink: #d9d8d4; --strong: #f1f0ec; --muted: #9b9a97; --line: #2f2f2f;
+  --accent: #6cb4e4; --accent-soft: #1c2d38; --hit: #2a2a29; --fault: #f08a85; --fault-soft: #3a2424;
+  --ok: #86c38c; --ok-soft: #1f2e21; --warn-soft: #362f1c; --warn: #e0b45c; --btn-bg: #f1f0ec; --btn-fg: #191919;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 920px; margin: 0 auto; padding-inline: 20px; padding-block: 72px 96px; display: grid; gap: 112px; }
+h1, h2, h3 { font-family: var(--display); color: var(--strong); line-height: 1.1; margin: 0; text-wrap: balance; font-weight: 500; letter-spacing: -0.02em; }
+p { margin: 0; max-width: 64ch; }
+a { color: var(--strong); text-underline-offset: 3px; text-decoration-color: var(--line); }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+section { display: grid; gap: 28px; }
+section > header { display: grid; gap: 12px; }
+h2 { font-size: clamp(30px, 4.6vw, 44px); }
+.lede { color: var(--muted); }
+
+.hero { display: grid; gap: 24px; }
+.hero h1 { font-size: clamp(72px, 15vw, 152px); letter-spacing: -0.04em; font-weight: 400; }
+.hero h1 span { font-style: italic; color: var(--fault); }
+.hero .thesis { font-family: var(--display); font-size: clamp(22px, 3vw, 30px); max-width: 30ch; line-height: 1.3; color: var(--strong); }
+.hero .meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.hero .meta span { font-family: var(--mono); font-size: 12px; letter-spacing: .05em; text-transform: uppercase; padding: 4px 10px; border-radius: 9999px; background: var(--hit); color: var(--muted); }
+.hero .meta b { color: var(--strong); font-weight: 500; }
+.links { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 5px; font-weight: 500; text-decoration: none; font-size: 15px; border: 1px solid var(--line); color: var(--strong); background: var(--panel); cursor: pointer; font-family: var(--body); transition: background .2s, transform .1s; }
+.btn:hover { background: var(--hit); }
+.btn:active { transform: scale(0.98); }
+.btn.primary { background: var(--btn-bg); border-color: var(--btn-bg); color: var(--btn-fg); }
+.btn.primary:hover { opacity: .88; }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 32px; display: grid; gap: 20px; min-width: 0; }
+
+.ref-row { display: grid; grid-template-columns: 74px 1fr; gap: 12px; align-items: center; }
+.ref-row .label { font-size: 13px; color: var(--muted); }
+.ref-row .label b { display: block; color: var(--strong); font-family: var(--mono); font-size: 20px; font-weight: 500; }
+.cells { display: flex; flex-wrap: wrap; gap: 3px; min-width: 0; }
+.cell { width: 27px; height: 34px; display: grid; place-items: center; border-radius: 4px; font-family: var(--mono); font-size: 14px; background: var(--hit); color: var(--muted); }
+.cell.fault { background: var(--fault-soft); color: var(--fault); font-weight: 500; }
+.cell.ref { background: transparent; color: var(--strong); font-weight: 500; }
+.verdict { font-size: 17px; }
+.verdict .bad { color: var(--fault); font-weight: 600; }
+.verdict .good { color: var(--ok); font-weight: 600; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.controls input { flex: 1 1 260px; min-width: 0; font-family: var(--mono); font-size: 15px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); color: var(--strong); }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+
+.tbl { overflow-x: auto; padding: 8px 32px; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; padding: 14px 12px 14px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+tbody tr:last-child td { border-bottom: 0; }
+th { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 400; }
+td:first-child { font-weight: 500; color: var(--strong); white-space: nowrap; }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tab { padding: 6px 12px; border-radius: 5px; border: 1px solid var(--line); background: transparent; color: var(--muted); font: 500 14px var(--body); cursor: pointer; }
+.tab:hover { color: var(--strong); }
+.tab[aria-selected="true"] { background: var(--btn-bg); border-color: var(--btn-bg); color: var(--btn-fg); }
+.caption { font-size: 14px; color: var(--muted); }
+.bars { display: grid; gap: 10px; }
+.bar { display: grid; grid-template-columns: 82px 1fr 64px; gap: 12px; align-items: center; }
+.bar .name { font-weight: 500; font-size: 15px; color: var(--strong); }
+.bar .track { height: 14px; background: var(--hit); border-radius: 3px; position: relative; overflow: hidden; }
+.bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 3px; transition: width .5s cubic-bezier(0.16, 1, 0.3, 1); }
+.bar.worst .fill { background: var(--fault); }
+.bar .val { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; font-size: 15px; color: var(--strong); }
+.axis { display: grid; grid-template-columns: 82px 1fr 64px; gap: 12px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.axis .ticks { position: relative; height: 16px; }
+.axis .ticks span { position: absolute; transform: translateX(-50%); }
+.axis .ticks span:first-child { transform: none; }
+.note { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+
+.stats { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); overflow: hidden; }
+.stat { padding: 28px 24px; display: grid; gap: 6px; align-content: start; border-left: 1px solid var(--line); }
+.stat:first-child { border-left: 0; background: var(--ok-soft); }
+.stat .big { font-family: var(--display); font-size: 48px; font-weight: 400; line-height: 1; color: var(--strong); letter-spacing: -0.02em; }
+.stat .small { font-size: 14px; color: var(--muted); }
+
+.chart-wrap { overflow-x: auto; }
+svg text { font-family: var(--mono); font-size: 12px; fill: var(--muted); }
+
+.finds { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+.find { grid-column: span 2; padding: 26px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); display: grid; gap: 10px; align-content: start; }
+.find:nth-child(1) { grid-column: span 4; }
+.find:nth-child(6) { grid-column: span 6; }
+.find h3 { font-size: 24px; }
+.find .tag { justify-self: start; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 3px 9px; border-radius: 9999px; background: var(--accent-soft); color: var(--accent); }
+.find:nth-child(3n+2) .tag { background: var(--fault-soft); color: var(--fault); }
+.find:nth-child(3n) .tag { background: var(--warn-soft); color: var(--warn); }
+.find p { font-size: 15px; color: var(--muted); }
+
+pre { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 24px 28px; overflow-x: auto; font-family: var(--mono); font-size: 14px; line-height: 1.8; color: var(--strong); }
+pre .c { color: var(--muted); }
+footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 24px; }
+
+.reveal { animation: rise .6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes rise { from { transform: translateY(12px); } to { transform: none; } }
+
+@media (max-width: 760px) {
+  .stats { grid-template-columns: 1fr 1fr; }
+  .stat:nth-child(3) { border-left: 0; }
+  .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .finds { grid-template-columns: 1fr; }
+  .find, .find:nth-child(1), .find:nth-child(6) { grid-column: auto; }
+}
+@media (max-width: 560px) {
+  .wrap { gap: 80px; padding-block: 48px 72px; }
+  .panel { padding: 20px; }
+  .tbl { padding: 4px 20px; }
+  .ref-row { grid-template-columns: 1fr; gap: 6px; }
+  .cell { width: 26px; height: 30px; font-size: 13px; }
+  .bar, .axis { grid-template-columns: 64px 1fr 52px; gap: 8px; }
+  .bar .name { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) { .bar .fill { transition: none; } .reveal { animation: none; } }
+
+/* ---- Glass theme: frosted panels over a faint wash of the page's own pastels ---- */
+:root {
+  --glass: rgba(255, 255, 255, 0.58);
+  --glass-strong: rgba(255, 255, 255, 0.78);
+  --glass-edge: rgba(255, 255, 255, 0.9);
+  --glass-line: rgba(0, 0, 0, 0.06);
+  --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  --blob-1: #ffffff;
+  --blob-2: #e6e5e1;
+  --blob-3: #efeeeb;
+  --blob-4: #dcdbd7;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --glass: rgba(40, 40, 40, 0.50);
+    --glass-strong: rgba(48, 48, 48, 0.70);
+    --glass-edge: rgba(255, 255, 255, 0.08);
+    --glass-line: rgba(255, 255, 255, 0.07);
+    --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    --blob-1: #2e2e2e; --blob-2: #242424; --blob-3: #333333; --blob-4: #1e1e1e;
+  }
+}
+:root[data-theme="dark"] {
+    --glass: rgba(40, 40, 40, 0.50);
+    --glass-strong: rgba(48, 48, 48, 0.70);
+    --glass-edge: rgba(255, 255, 255, 0.08);
+    --glass-line: rgba(255, 255, 255, 0.07);
+    --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    --blob-1: #2e2e2e; --blob-2: #242424; --blob-3: #333333; --blob-4: #1e1e1e;
+}
+.bgfield { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; background: var(--bg); }
+.bgfield i { position: absolute; width: 55vmax; height: 55vmax; border-radius: 50%; filter: blur(90px); opacity: .9; animation: drift 28s ease-in-out infinite alternate; }
+.bgfield i:nth-child(1) { background: var(--blob-1); top: -18vmax; left: -12vmax; }
+.bgfield i:nth-child(2) { background: var(--blob-2); top: 10vmax; right: -20vmax; animation-delay: -7s; }
+.bgfield i:nth-child(3) { background: var(--blob-3); bottom: -22vmax; left: 10vmax; animation-delay: -14s; }
+.bgfield i:nth-child(4) { background: var(--blob-4); top: 45%; left: 35%; width: 35vmax; height: 35vmax; animation-delay: -20s; }
+@keyframes drift { from { transform: translate(0, 0) scale(1); } to { transform: translate(6vmax, 4vmax) scale(1.12); } }
+body { background: var(--bg); }
+.panel, .stats, .find, pre, .btn, .tab, .hero .meta span, .controls input {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid var(--glass-edge);
+}
+.panel, .stats, .find, pre { box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-edge); border-radius: 18px; }
+.stat { border-left-color: var(--glass-line); }
+.stat:first-child { background: var(--glass-strong); }
+.stat:nth-child(n+3) { border-top-color: var(--glass-line); }
+.find .tag { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.btn { border-radius: 10px; }
+.btn:hover { background: var(--glass-strong); }
+.btn.primary { background: var(--btn-bg); border-color: transparent; color: var(--btn-fg); }
+.tab { border-radius: 9999px; }
+.tab[aria-selected="true"] { background: var(--btn-bg); border-color: transparent; color: var(--btn-fg); }
+.controls input { border-radius: 10px; }
+.cell { background: var(--hit); border-radius: 6px; }
+.cell.ref { background: transparent; }
+.bar .track { background: var(--hit); border-radius: 9999px; }
+.bar .fill { border-radius: 9999px; }
+th, td { border-bottom-color: var(--glass-line); }
+footer { border-top-color: var(--glass-line); }
+.note { border-top-color: var(--glass-line); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .panel, .stats, .find, pre { background: var(--glass-strong); }
+}
+@media (prefers-reduced-motion: reduce) { .bgfield i { animation: none; } }
+/* ---- Live lab + method flow ---- */
+.lab-top { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
+.lab-grid { display: grid; grid-template-columns: 260px 1fr; gap: 20px; align-items: stretch; }
+.readout { display: grid; gap: 14px; align-content: start; }
+.ro { display: grid; gap: 2px; padding-bottom: 14px; border-bottom: 1px solid var(--glass-line); }
+.ro:last-child { border-bottom: 0; padding-bottom: 0; }
+.ro .small { font-size: 13px; color: var(--muted); }
+.ro-big { font-family: var(--display); font-size: 64px; line-height: 1; color: var(--fault); letter-spacing: -0.02em; }
+.ro-mid { font-family: var(--display); font-size: 30px; line-height: 1.1; color: var(--strong); }
+.lab-chart { min-width: 0; border: 1px solid var(--glass-line); border-radius: 12px; padding: 8px; background: var(--glass); }
+.lab-chart canvas { width: 100%; height: 260px; display: block; }
+.lab-strings { display: grid; gap: 8px; }
+.cells.small { gap: 2px; }
+.cells.small .cell { width: 19px; height: 24px; font-size: 11px; border-radius: 4px; }
+.flow { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; counter-reset: s; }
+.flow li { position: relative; padding: 24px; border-radius: 18px; background: var(--glass); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-edge); display: grid; gap: 8px; align-content: start; }
+.flow li:not(:last-child)::after { content: none; }
+.flow .step { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 9999px; background: var(--btn-bg); color: var(--btn-fg); font-size: 13px; }
+.flow h3 { font-size: 21px; }
+.flow p { font-size: 14px; color: var(--muted); }
+@media (max-width: 860px) {
+  .lab-grid { grid-template-columns: 1fr; }
+  .readout { grid-template-columns: repeat(3, 1fr); }
+  .ro { border-bottom: 0; padding-bottom: 0; }
+  .ro-big { font-size: 44px; }
+  .flow { grid-template-columns: 1fr 1fr; }
+  .flow li::after { display: none; }
+}
+@media (max-width: 560px) {
+  .readout { grid-template-columns: 1fr 1fr; }
+  .ro:first-child { grid-column: 1 / -1; }
+  .flow { grid-template-columns: 1fr; }
+  .cells.small .cell { width: 17px; height: 22px; font-size: 10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="bgfield" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+<main class="wrap">
+
+  <section class="hero" aria-labelledby="title">
+    <div class="eyebrow">Operating systems · adversarial search</div>
+    <h1 id="title">Mom<span>u</span>s</h1>
+    <p class="thesis">It evolves the workloads that make classical OS algorithms behave as badly as they possibly can.</p>
+    <p class="lede">Textbooks show each scheduling or paging policy with one friendly example. Momus does the opposite: it searches automatically for the input that hurts the policy most, then measures how far it falls behind the best possible policy on that same input.</p>
+    <div class="meta">
+      <span><b class="num">22</b> policies</span>
+      <span><b class="num">4</b> OS domains</span>
+      <span><b class="num">4,380</b> search runs</span>
+      <span><b class="num">30</b> seeds per setting</span>
+    </div>
+    <div class="links">
+      <a class="btn primary" href="https://github.com/keshavkhandelwall/momus">View the code on GitHub</a>
+      <a class="btn" href="https://github.com/keshavkhandelwall/momus/tree/main/paper">Read the paper</a>
+    </div>
+  </section>
+
+  <section class="reveal" aria-labelledby="lab-h">
+    <header>
+      <div class="eyebrow">Live · the search running in your browser</div>
+      <h2 id="lab-h">Watch Momus break a page-replacement policy</h2>
+      <p class="lede">Press Start. Momus begins with a random 64-page reference string, mutates it thousands of times, and keeps every change that makes the chosen policy fault more than Belady's optimal policy. This is the same restarting hill climber used in the study, with 4 frames and 8 pages.</p>
+    </header>
+    <div class="panel lab">
+      <div class="lab-top">
+        <div class="tabs" role="tablist" id="lab-policies"></div>
+        <div class="controls">
+          <button class="btn primary" type="button" id="lab-go">Start</button>
+          <button class="btn" type="button" id="lab-reset">Reset</button>
+        </div>
+      </div>
+      <div class="lab-grid">
+        <div class="readout">
+          <div class="ro"><span class="eyebrow">Worst ratio found</span><span class="ro-big num" id="lab-ratio">–</span><span class="small" id="lab-faults">Not started</span></div>
+          <div class="ro"><span class="eyebrow">Workloads tried</span><span class="ro-mid num" id="lab-evals">0</span><span class="small">of 10,000, like each run in the study</span></div>
+          <div class="ro"><span class="eyebrow">Study's best for this policy</span><span class="ro-mid num" id="lab-paper">–</span><span class="small" id="lab-paper-note"></span></div>
+        </div>
+        <div class="lab-chart"><canvas id="lab-canvas" height="260" aria-label="Best ratio found so far against workloads tried"></canvas></div>
+      </div>
+      <div class="lab-strings">
+        <div class="ref-row"><div class="label" id="lab-pol-label">LRU</div><div class="cells small" id="lab-row-pol"></div></div>
+        <div class="ref-row"><div class="label">OPT</div><div class="cells small" id="lab-row-opt"></div></div>
+      </div>
+      <p class="caption" id="lab-story">The cells show the current worst string. Red cells are page faults. Watch the policy's row turn red while OPT's row stays mostly grey.</p>
+    </div>
+  </section>
+
+  <section class="reveal" aria-labelledby="how-h">
+    <header>
+      <div class="eyebrow">Method</div>
+      <h2 id="how-h">How Momus works</h2>
+      <p class="lede">Every domain plugs into the same loop. Only the simulator and the optimal reference change.</p>
+    </header>
+    <ol class="flow">
+      <li><span class="step num">1</span><h3>Encode a workload</h3><p>A matrix of numbers: page references, process arrivals and burst lengths, disk cylinders, or heap requests.</p></li>
+      <li><span class="step num">2</span><h3>Simulate the policy</h3><p>Run the policy under attack on that workload and record its cost: faults, turnaround, head movement or memory.</p></li>
+      <li><span class="step num">3</span><h3>Score against optimal</h3><p>Divide by the cost of the optimal policy on the same input. The ratio is the fitness.</p></li>
+      <li><span class="step num">4</span><h3>Search for worse</h3><p>Random search, hill climbing, a genetic algorithm or MAP-Elites mutate the workload and keep what scores higher.</p></li>
+    </ol>
+  </section>
+
+  <section class="reveal" aria-labelledby="belady-h">
+    <header>
+      <div class="eyebrow">Try it · Belady's anomaly</div>
+      <h2 id="belady-h">More memory, more page faults</h2>
+      <p class="lede">With FIFO page replacement, giving a program an extra frame can make it fault more. The textbook string shows 9 faults with 3 frames and 10 with 4. Momus found a 24-reference string that goes from 14 faults to 20. Each red cell below is a page fault.</p>
+    </header>
+    <div class="panel">
+      <div class="controls">
+        <button class="btn" type="button" id="preset-momus">Momus string (14 vs 20)</button>
+        <button class="btn" type="button" id="preset-book">Textbook string (9 vs 10)</button>
+      </div>
+      <div class="ref-row"><div class="label">Reference</div><div class="cells" id="row-ref"></div></div>
+      <div class="ref-row"><div class="label">3 frames<b class="num" id="f3">0</b></div><div class="cells" id="row-3"></div></div>
+      <div class="ref-row"><div class="label">4 frames<b class="num" id="f4">0</b></div><div class="cells" id="row-4"></div></div>
+      <p class="verdict" id="verdict"></p>
+      <div class="controls">
+        <label for="refs" class="caption">Or type your own page numbers, separated by spaces:</label>
+        <input id="refs" type="text" inputmode="numeric" autocomplete="off" spellcheck="false">
+        <button class="btn primary" type="button" id="run">Run FIFO</button>
+      </div>
+      <div class="legend"><span><i style="background:var(--fault-soft);outline:1px solid var(--fault)"></i>Fault (page loaded)</span><span><i style="background:var(--hit)"></i>Hit (page already in memory)</span></div>
+    </div>
+  </section>
+
+  <section class="reveal" aria-labelledby="domains-h">
+    <header>
+      <div class="eyebrow">Scope</div>
+      <h2 id="domains-h">What it attacks</h2>
+      <p class="lede">Every workload is scored by its empirical competitive ratio: the policy's cost divided by the cost of an optimal (or clearly stated reference) policy on the same input. A ratio of 3 means three times worse than the best possible.</p>
+    </header>
+    <div class="panel tbl">
+      <table>
+        <thead><tr><th>Domain</th><th>Policies under attack</th><th>Compared against</th></tr></thead>
+        <tbody>
+          <tr><td>CPU scheduling</td><td>FCFS, SJF, Priority, SRTF, Round Robin (q=2, q=8), MLFQ</td><td>SRTF for mean turnaround, FCFS for max turnaround</td></tr>
+          <tr><td>Page replacement</td><td>FIFO, LRU, Clock, LFU</td><td>Belady's OPT</td></tr>
+          <tr><td>Disk scheduling</td><td>FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK</td><td>Offline optimal sweep; FCFS for max wait</td></tr>
+          <tr><td>Memory allocation</td><td>First, next, best, worst fit; buddy</td><td>Ideal allocator (peak live bytes)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="reveal" aria-labelledby="rank-h">
+    <header>
+      <div class="eyebrow">Results</div>
+      <h2 id="rank-h">How badly each policy can do</h2>
+      <p class="lede">The worst ratio Momus found for every policy, most robust at the top. Pick a setting.</p>
+    </header>
+    <div class="panel">
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <p class="caption" id="rank-caption"></p>
+      <div class="bars" id="bars"></div>
+      <div class="axis" aria-hidden="true"><span></span><div class="ticks" id="ticks"></div><span></span></div>
+      <p class="note">Bars use a log scale, so SCAN and C-SCAN (100× and 199×) fit next to policies that stay under 2×.</p>
+    </div>
+  </section>
+
+  <section class="reveal" aria-labelledby="method-h">
+    <header>
+      <div class="eyebrow">Does the search matter?</div>
+      <h2 id="method-h">Evolution beats random guessing every time</h2>
+      <p class="lede">Four search methods attacked each of the 32 settings, 30 runs each. All three evolutionary methods beat random search in every setting (Vargha–Delaney A12 ≥ 0.99, p &lt; 0.05). The surprise: a simple restarting hill climber was the strongest method most often.</p>
+    </header>
+    <div class="stats">
+      <div class="stat"><span class="big num">32/32</span><span class="small">settings where every evolutionary method beat random search</span></div>
+      <div class="stat"><span class="big num">21</span><span class="small">settings won by hill climbing</span></div>
+      <div class="stat"><span class="big num">9</span><span class="small">won by the genetic algorithm</span></div>
+      <div class="stat"><span class="big num">2</span><span class="small">won by MAP-Elites; random search won none</span></div>
+    </div>
+  </section>
+
+  <section class="reveal" aria-labelledby="bound-h">
+    <header>
+      <div class="eyebrow">Checking against theory</div>
+      <h2 id="bound-h">LRU gets close to its proven limit</h2>
+      <p class="lede">Theory says LRU with k frames is never more than k times worse than OPT. The best hand-built attack (the cyclic adversary) gets near that limit on finite strings. Momus, with no hints, reaches 86 to 100 percent of the hand-built attack.</p>
+    </header>
+    <div class="panel">
+      <div class="chart-wrap"><svg id="bound" viewBox="0 0 640 300" width="100%" role="img" aria-label="LRU worst ratio by number of frames: theoretical bound, cyclic adversary, and Momus evolved maximum"></svg></div>
+      <div class="legend">
+        <span><i style="background:var(--muted)"></i>Theoretical bound (k)</span>
+        <span><i style="background:var(--accent)"></i>Hand-built cyclic adversary</span>
+        <span><i style="background:var(--fault)"></i>Momus, best evolved</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="reveal" aria-labelledby="finds-h">
+    <header>
+      <div class="eyebrow">Rediscovered without being told</div>
+      <h2 id="finds-h">Known failures it found on its own</h2>
+    </header>
+    <div class="finds">
+      <article class="find"><span class="tag">CPU · FCFS</span><h3>Convoy effect</h3><p>One long job arrives first and every short job waits behind it. Mean turnaround reaches 9.36× SRTF.</p></article>
+      <article class="find"><span class="tag">Paging · LRU</span><h3>Cyclic adversary</h3><p>Loop over k+1 pages so the page LRU just evicted is always the next one needed. Ratio 3.37 with 4 frames.</p></article>
+      <article class="find"><span class="tag">Paging · LFU</span><h3>Stale-frequency trap</h3><p>Pages used heavily early on stay in memory long after they stop mattering. LFU reaches 12× OPT, the worst paging result.</p></article>
+      <article class="find"><span class="tag">Disk · SCAN, C-SCAN</span><h3>Edge travel</h3><p>The arm sweeps to the end of the disk even when every request is close by. Up to 199× the optimal head movement, while LOOK stays under 2×.</p></article>
+      <article class="find"><span class="tag">Paging · FIFO</span><h3>Belady's anomaly</h3><p>Found in every hill-climbing run. The largest: 25 faults with 3 frames and 37 with 4.</p></article>
+      <article class="find"><span class="tag">Memory · buddy</span><h3>Power-of-two waste</h3><p>Buddy allocation can need 5.2× the live memory, against about 2.4× for the fit policies.</p></article>
+    </div>
+  </section>
+
+  <section class="reveal" aria-labelledby="run-h">
+    <header>
+      <div class="eyebrow">Reproduce it</div>
+      <h2 id="run-h">Run it yourself</h2>
+      <p class="lede">Pure Python with NumPy. The full study takes about 30 minutes on 4 cores.</p>
+    </header>
+<pre><span class="c"># install and check the simulators against textbook answers</span>
+pip install -r requirements.txt
+python -m pytest -q tests
+
+<span class="c"># quick smoke test, then the full study and the figures</span>
+python -m experiments.run_all --quick
+python -m experiments.run_all
+python -m experiments.analyze</pre>
+  </section>
+
+  <footer>
+    Momus is named after the Greek god of criticism and mockery. All numbers on this page come from the study's results files (4,380 runs). Code and paper: <a href="https://github.com/keshavkhandelwall/momus">github.com/keshavkhandelwall/momus</a>.
+  </footer>
+</main>
+
+<script>
+(function () {
+  // ---------- Belady demo ----------
+  var MOMUS = "4 5 0 2 4 5 1 4 3 5 2 1 4 4 3 5 2 0 4 3 0 5 2 0";
+  var BOOK = "1 2 3 4 1 2 5 1 2 3 4 5";
+  var input = document.getElementById("refs");
+
+  function fifo(refs, k) {
+    var q = [], faults = [];
+    refs.forEach(function (p) {
+      if (q.indexOf(p) === -1) {
+        faults.push(true); q.push(p); if (q.length > k) q.shift();
+      } else faults.push(false);
+    });
+    return faults;
+  }
+  function cells(el, refs, flags) {
+    el.innerHTML = "";
+    refs.forEach(function (p, i) {
+      var c = document.createElement("span");
+      c.className = "cell" + (flags ? (flags[i] ? " fault" : "") : " ref");
+      c.textContent = p;
+      el.appendChild(c);
+    });
+  }
+  function run() {
+    var refs = input.value.trim().split(/[\s,]+/).filter(Boolean).slice(0, 80);
+    var v = document.getElementById("verdict");
+    if (!refs.length) { v.textContent = "Type at least one page number."; return; }
+    var a = fifo(refs, 3), b = fifo(refs, 4);
+    var n3 = a.filter(Boolean).length, n4 = b.filter(Boolean).length;
+    cells(document.getElementById("row-ref"), refs, null);
+    cells(document.getElementById("row-3"), refs, a);
+    cells(document.getElementById("row-4"), refs, b);
+    document.getElementById("f3").textContent = n3;
+    document.getElementById("f4").textContent = n4;
+    if (n4 > n3) v.innerHTML = '<span class="bad">Anomaly.</span> Adding a frame caused ' + (n4 - n3) + " extra fault" + (n4 - n3 === 1 ? "" : "s") + " (" + n3 + " → " + n4 + ").";
+    else v.innerHTML = '<span class="good">No anomaly.</span> 4 frames gave ' + (n3 - n4) + " fewer fault" + (n3 - n4 === 1 ? "" : "s") + " than 3, as you would expect.";
+  }
+  function preset(s) { input.value = s; run(); }
+  document.getElementById("preset-momus").addEventListener("click", function () { preset(MOMUS); });
+  document.getElementById("preset-book").addEventListener("click", function () { preset(BOOK); });
+  document.getElementById("run").addEventListener("click", run);
+  input.addEventListener("keydown", function (e) { if (e.key === "Enter") run(); });
+  preset(MOMUS);
+
+  // ---------- Robustness ranking (results/robustness_ranking.csv) ----------
+  var SETTINGS = {
+    "paging": { label: "Paging", ref: "faults vs Belady's OPT", rows: [["FIFO",3.2941],["Clock",3.2941],["LRU",3.3684],["LFU",12.0]] },
+    "cpu-mean": { label: "CPU: mean turnaround", ref: "mean turnaround vs SRTF", rows: [["RR q=2",3.686],["RR q=8",4.4364],["MLFQ",4.4961],["SJF",9.1429],["FCFS",9.3571],["Priority",9.8667]] },
+    "cpu-max": { label: "CPU: worst wait", ref: "max turnaround vs FCFS", rows: [["RR q=8",3.4146],["RR q=2",3.6857],["SJF",4.8],["SRTF",5.0],["MLFQ",6.625],["Priority",7.25]] },
+    "disk-seek": { label: "Disk: head movement", ref: "head movement vs offline optimum", rows: [["LOOK",1.9608],["SSTF",1.9612],["C-LOOK",1.9802],["FCFS",22.1935],["SCAN",100.0],["C-SCAN",199.0]] },
+    "disk-wait": { label: "Disk: worst wait", ref: "max wait vs FCFS", rows: [["SSTF",8.1333],["LOOK",9.4688],["C-LOOK",12.2],["SCAN",74.75],["C-SCAN",199.0]] },
+    "memory": { label: "Memory", ref: "memory used vs peak live bytes", rows: [["Next fit",2.322],["Best fit",2.3892],["First fit",2.418],["Worst fit",2.4516],["Buddy",5.2245]] }
+  };
+  var MAX = 200, LOGMAX = Math.log(MAX);
+  function pct(v) { return Math.max(1.5, Math.log(v) / LOGMAX * 100); }
+  var ticks = document.getElementById("ticks");
+  [1, 2, 5, 10, 50, 200].forEach(function (t) {
+    var s = document.createElement("span");
+    s.style.left = (t === 1 ? 0 : Math.log(t) / LOGMAX * 100) + "%";
+    s.textContent = t + "×";
+    ticks.appendChild(s);
+  });
+  var tabs = document.getElementById("tabs"), bars = document.getElementById("bars");
+  function show(key) {
+    var s = SETTINGS[key];
+    Array.prototype.forEach.call(tabs.children, function (b) { b.setAttribute("aria-selected", b.dataset.key === key ? "true" : "false"); });
+    document.getElementById("rank-caption").textContent = "Worst ratio found: " + s.ref + ".";
+    bars.innerHTML = "";
+    var worst = Math.max.apply(null, s.rows.map(function (r) { return r[1]; }));
+    s.rows.forEach(function (r) {
+      var row = document.createElement("div");
+      row.className = "bar" + (r[1] === worst ? " worst" : "");
+      row.innerHTML = '<span class="name"></span><span class="track"><span class="fill"></span></span><span class="val"></span>';
+      row.querySelector(".name").textContent = r[0];
+      row.querySelector(".fill").style.width = pct(r[1]) + "%";
+      row.querySelector(".val").textContent = (r[1] >= 100 ? r[1].toFixed(0) : r[1].toFixed(2)) + "×";
+      bars.appendChild(row);
+    });
+    try { localStorage.setItem("momus-tab", key); } catch (e) {}
+  }
+  Object.keys(SETTINGS).forEach(function (k) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "tab"; b.setAttribute("role", "tab"); b.dataset.key = k;
+    b.textContent = SETTINGS[k].label;
+    b.addEventListener("click", function () { show(k); });
+    tabs.appendChild(b);
+  });
+  var start = "paging";
+  try { var saved = localStorage.getItem("momus-tab"); if (saved && SETTINGS[saved]) start = saved; } catch (e) {}
+  show(start);
+
+  // ---------- Bound chart (results/bound_tightness.csv, LRU) ----------
+  var K = [2,3,4,5,6], CYC = [1.9394,2.6667,3.3684,3.7647,4.0], EVO = [1.9355,2.6667,3.2,3.6667,3.8571];
+  var svg = document.getElementById("bound"), NS = "http://www.w3.org/2000/svg";
+  var L = 56, R = 620, T = 18, B = 254, y0 = 1, y1 = 6.5;
+  function x(k) { return L + (k - 2) / 4 * (R - L - 20) + 10; }
+  function y(v) { return B - (v - y0) / (y1 - y0) * (B - T); }
+  function el(tag, attrs, text) { var e = document.createElementNS(NS, tag); for (var a in attrs) e.setAttribute(a, attrs[a]); if (text != null) e.textContent = text; svg.appendChild(e); return e; }
+  [1,2,3,4,5,6].forEach(function (v) {
+    el("line", { x1: L, x2: R, y1: y(v), y2: y(v), stroke: "var(--line)", "stroke-width": 1 });
+    el("text", { x: L - 10, y: y(v) + 4, "text-anchor": "end" }, v + "×");
+  });
+  K.forEach(function (k) { el("text", { x: x(k), y: B + 22, "text-anchor": "middle" }, "k=" + k); });
+  el("text", { x: (L + R) / 2, y: B + 42, "text-anchor": "middle" }, "frames (k)");
+  function line(vals, color, dash, w) {
+    el("polyline", { points: K.map(function (k, i) { return x(k) + "," + y(vals[i]); }).join(" "), fill: "none", stroke: color, "stroke-width": w, "stroke-dasharray": dash || "none", "stroke-linejoin": "round" });
+    K.forEach(function (k, i) { el("circle", { cx: x(k), cy: y(vals[i]), r: w + 1.5, fill: color }); });
+  }
+  line(K, "var(--muted)", "5 5", 1.5);
+  line(CYC, "var(--accent)", null, 2.5);
+  line(EVO, "var(--fault)", null, 2.5);
+  el("text", { x: x(6), y: y(3.8571) + 20, "text-anchor": "end", style: "fill:var(--fault)" }, "3.86");
+  el("text", { x: x(6), y: y(4.0) - 10, "text-anchor": "end", style: "fill:var(--accent)" }, "4.00");
+})();
+</script>
+<script>
+(function () {
+  // ---------- Live lab: (1+1)-EA with restarts, same simulators as momus/domains/paging.py ----------
+  var K = 4, PAGES = 8, LEN = 64, BUDGET = 10000, RESTART = 500, PER_FRAME = 60;
+  function fifo(r, k) { var q = [], f = []; for (var i = 0; i < r.length; i++) { var p = r[i]; if (q.indexOf(p) >= 0) { f.push(0); continue; } f.push(1); if (q.length === k) q.shift(); q.push(p); } return f; }
+  function lru(r, k) { var q = [], f = []; for (var i = 0; i < r.length; i++) { var p = r[i], j = q.indexOf(p); if (j >= 0) { q.splice(j, 1); q.push(p); f.push(0); continue; } f.push(1); if (q.length === k) q.shift(); q.push(p); } return f; }
+  function clock(r, k) { var fr = [], used = [], where = {}, hand = 0, f = []; for (var s = 0; s < k; s++) { fr.push(null); used.push(0); }
+    for (var i = 0; i < r.length; i++) { var p = r[i], slot = where[p]; if (slot !== undefined) { used[slot] = 1; f.push(0); continue; } f.push(1);
+      while (used[hand]) { used[hand] = 0; hand = (hand + 1) % k; } if (fr[hand] !== null) delete where[fr[hand]]; fr[hand] = p; used[hand] = 1; where[p] = hand; hand = (hand + 1) % k; } return f; }
+  function lfu(r, k) { var cnt = {}, last = {}, n = 0, f = []; for (var t = 0; t < r.length; t++) { var p = r[t]; if (p in cnt) { cnt[p]++; last[p] = t; f.push(0); continue; } f.push(1);
+      if (n === k) { var v = null; for (var q in cnt) { if (v === null || cnt[q] < cnt[v] || (cnt[q] === cnt[v] && last[q] < last[v])) v = q; } delete cnt[v]; delete last[v]; n--; }
+      cnt[p] = 1; last[p] = t; n++; } return f; }
+  function opt(r, k) { var n = r.length, nxt = new Array(n), seen = {}, f = [];
+    for (var i = n - 1; i >= 0; i--) { nxt[i] = (r[i] in seen) ? seen[r[i]] : n + i; seen[r[i]] = i; }
+    var res = {}, cnt = 0;
+    for (i = 0; i < n; i++) { var p = r[i]; if (p in res) { res[p] = nxt[i]; f.push(0); continue; } f.push(1);
+      if (cnt === k) { var v = null; for (var q in res) if (v === null || res[q] > res[v]) v = q; delete res[v]; cnt--; } res[p] = nxt[i]; cnt++; } return f; }
+  function sum(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return s; }
+  var POL = {
+    LRU: { fn: lru, paper: 3.37, random: 2.02, note: "Hand-built cyclic attack: 3.37" },
+    FIFO: { fn: fifo, paper: 3.29, random: 2.06, note: "Random search median: 2.06" },
+    Clock: { fn: clock, paper: 3.29, random: 2.05, note: "Random search median: 2.05" },
+    LFU: { fn: lfu, paper: 12.0, random: 2.63, note: "The worst paging result in the study" }
+  };
+  var pol = "LRU", running = false, raf = 0;
+  var cur, curFit, best, bestFit, evals, stale, history;
+  function rnd(n) { return Math.floor(Math.random() * n); }
+  function randomRef() { var g = []; for (var i = 0; i < LEN; i++) g.push(rnd(PAGES)); return g; }
+  function fitness(g) { return sum(POL[pol].fn(g, K)) / sum(opt(g, K)); }
+  function mutate(g) {
+    g = g.slice(); var ops = 1 + (Math.random() < 0.4 ? 1 : 0);
+    for (var o = 0; o < ops; o++) {
+      var op = rnd(4), a = rnd(LEN), b = rnd(LEN), i, t;
+      if (op === 0) g[a] = rnd(PAGES);
+      else if (op === 1) { t = g[a]; g[a] = g[b]; g[b] = t; }
+      else if (op === 2) { var L = 1 + rnd(8), s = rnd(LEN - L), d = rnd(LEN - L), seg = g.slice(s, s + L); for (i = 0; i < L; i++) g[d + i] = seg[i]; }
+      else { if (a > b) { t = a; a = b; b = t; } var r = g.slice(a, b + 1).reverse(); for (i = 0; i < r.length; i++) g[a + i] = r[i]; }
+    }
+    return g;
+  }
+  function reset() {
+    running = false; cancelAnimationFrame(raf);
+    cur = randomRef(); curFit = fitness(cur); best = cur; bestFit = curFit; evals = 1; stale = 0; history = [[1, bestFit]];
+    document.getElementById("lab-go").textContent = "Start";
+    render();
+  }
+  function step() {
+    for (var i = 0; i < PER_FRAME && evals < BUDGET; i++) {
+      var c = mutate(cur), f = fitness(c); evals++;
+      if (f >= curFit) { stale = f > curFit ? 0 : stale + 1; cur = c; curFit = f; } else stale++;
+      if (f > bestFit) { best = c; bestFit = f; history.push([evals, bestFit]); }
+      if (stale >= RESTART && evals < BUDGET) { cur = randomRef(); curFit = fitness(cur); evals++; stale = 0; }
+    }
+    render();
+    if (evals >= BUDGET) { running = false; document.getElementById("lab-go").textContent = "Run again"; return; }
+    if (running) raf = requestAnimationFrame(step);
+  }
+  function cells(el, refs, flags) {
+    var html = "";
+    for (var i = 0; i < refs.length; i++) html += '<span class="cell' + (flags[i] ? " fault" : "") + '">' + refs[i] + "</span>";
+    el.innerHTML = html;
+  }
+  function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+  function draw() {
+    var cv = document.getElementById("lab-canvas"), dpr = window.devicePixelRatio || 1;
+    var w = cv.clientWidth, h = cv.clientHeight; if (!w) return;
+    cv.width = w * dpr; cv.height = h * dpr;
+    var c = cv.getContext("2d"); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
+    var P = POL[pol], ymax = Math.max(4, Math.ceil(Math.max(P.paper, bestFit) + 0.5)), L = 40, R = w - 12, T = 12, B = h - 28;
+    function X(e) { return L + (e / BUDGET) * (R - L); }
+    function Y(v) { return B - ((v - 1) / (ymax - 1)) * (B - T); }
+    c.font = "11px " + css("--mono"); c.fillStyle = css("--muted"); c.strokeStyle = css("--line"); c.lineWidth = 1;
+    var stepY = ymax > 8 ? 2 : 1;
+    for (var v = 1; v <= ymax; v += stepY) { c.beginPath(); c.moveTo(L, Y(v)); c.lineTo(R, Y(v)); c.stroke(); c.textAlign = "right"; c.fillText(v + "×", L - 6, Y(v) + 4); }
+    c.textAlign = "center";
+    [0, 2500, 5000, 7500, 10000].forEach(function (e) { c.fillText(e === 0 ? "0" : (e / 1000) + "k", X(e), h - 8); });
+    function hline(val, color, label) {
+      c.setLineDash([5, 5]); c.strokeStyle = color; c.beginPath(); c.moveTo(L, Y(val)); c.lineTo(R, Y(val)); c.stroke(); c.setLineDash([]);
+      c.fillStyle = color; c.textAlign = "right"; c.fillText(label, R - 4, Y(val) - 6);
+    }
+    hline(P.random, css("--muted"), "random search median " + P.random.toFixed(2));
+    hline(P.paper, css("--accent"), "study's best " + P.paper.toFixed(2));
+    c.strokeStyle = css("--fault"); c.lineWidth = 2.5; c.beginPath();
+    for (var i = 0; i < history.length; i++) {
+      var x = X(history[i][0]), y = Y(history[i][1]);
+      if (i === 0) c.moveTo(x, y); else { c.lineTo(x, Y(history[i - 1][1])); c.lineTo(x, y); }
+    }
+    c.lineTo(X(evals), Y(bestFit)); c.stroke();
+    c.fillStyle = css("--fault"); c.beginPath(); c.arc(X(evals), Y(bestFit), 4, 0, 6.3); c.fill();
+  }
+  function render() {
+    var P = POL[pol], fp = P.fn(best, K), fo = opt(best, K), a = sum(fp), b = sum(fo);
+    document.getElementById("lab-ratio").textContent = bestFit.toFixed(2) + "×";
+    document.getElementById("lab-faults").textContent = pol + " " + a + " faults vs OPT " + b;
+    document.getElementById("lab-evals").textContent = evals.toLocaleString("en-US");
+    document.getElementById("lab-paper").textContent = P.paper.toFixed(2) + "×";
+    document.getElementById("lab-paper-note").textContent = P.note;
+    document.getElementById("lab-pol-label").textContent = pol;
+    cells(document.getElementById("lab-row-pol"), best, fp);
+    cells(document.getElementById("lab-row-opt"), best, fo);
+    draw();
+  }
+  var tabs = document.getElementById("lab-policies");
+  Object.keys(POL).forEach(function (k) {
+    var b = document.createElement("button"); b.type = "button"; b.className = "tab"; b.setAttribute("role", "tab"); b.textContent = k;
+    b.setAttribute("aria-selected", k === pol ? "true" : "false");
+    b.addEventListener("click", function () { pol = k; Array.prototype.forEach.call(tabs.children, function (t) { t.setAttribute("aria-selected", t.textContent === k ? "true" : "false"); }); reset(); });
+    tabs.appendChild(b);
+  });
+  document.getElementById("lab-go").addEventListener("click", function () {
+    if (evals >= BUDGET) reset();
+    running = !running; this.textContent = running ? "Pause" : "Resume";
+    if (running) raf = requestAnimationFrame(step);
+  });
+  document.getElementById("lab-reset").addEventListener("click", reset);
+  window.addEventListener("resize", draw);
+  if (window.matchMedia) window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+  reset();
+})();
+</script>
+</body>
+</html>
