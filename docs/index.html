@@ -227,6 +227,8 @@ footer { border-top-color: var(--glass-line); }
   .panel, .stats, .find, pre { background: var(--glass-strong); }
 }
 @media (prefers-reduced-motion: reduce) { .bgfield i { animation: none; } }
+.video-panel { padding: 12px; }
+.video-panel video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 10px; background: var(--hit); }
 /* ---- Live lab + method flow ---- */
 .lab-top { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
 .lab-grid { display: grid; grid-template-columns: 260px 1fr; gap: 20px; align-items: stretch; }
@@ -282,6 +284,20 @@ footer { border-top-color: var(--glass-line); }
     <div class="links">
       <a class="btn primary" href="https://github.com/keshavkhandelwall/momus">View the code on GitHub</a>
       <a class="btn" href="https://github.com/keshavkhandelwall/momus/tree/main/paper">Read the paper</a>
+    </div>
+  </section>
+
+  <section class="reveal" aria-labelledby="video-h">
+    <header>
+      <div class="eyebrow">Watch · 44 seconds</div>
+      <h2 id="video-h">Momus in under a minute</h2>
+    </header>
+    <div class="panel video-panel">
+      <video controls playsinline preload="metadata" poster="media/momus_pitch_poster.jpg" aria-label="Momus pitch video">
+        <source src="media/momus_pitch.mp4" type="video/mp4">
+        <source src="media/momus_pitch.webm" type="video/webm">
+        <a href="media/momus_pitch.mp4">Download the Momus pitch video</a>
+      </video>
     </div>
   </section>
 
